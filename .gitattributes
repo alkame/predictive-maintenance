@@ -1,11 +1,3 @@
-# Treat notebooks as Python for language stats
 *.ipynb linguist-language=Python
+*.py    linguist-language=Python
 
-# Ensure regular Python scripts are counted as Python
-*.py linguist-language=Python
-
-# (Opsiyonel) ignore large binary/media files from language stats
-*.png linguist-detectable=false
-*.jpg linguist-detectable=false
-*.gif linguist-detectable=false
-*.csv linguist-detectable=false
