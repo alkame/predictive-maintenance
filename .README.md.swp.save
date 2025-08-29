@@ -1,0 +1,126 @@
+# Predictive Maintenance – Regression + Klassifikation
+
+Dieses Projekt beschäftigt sich mit der Vorhersage von Maschinenstörungen (Predictive Maintenance).  
+Ziel ist die frühzeitige Erkennung von Ausfällen sowie die Schätzung der Restnutzungsdauer (Remaining Useful Life, RUL).  
+Das Projekt kombiniert Regression und Klassifikation, nutzt Zeitreihen-Cross-Validation und optimiert Schwellenwerte kostenbewusst.
+
+## Vorgehen
+
+1. Daten laden  
+   - CSV-Datei mit Zeitstempeln und Sensordaten wird eingelesen  
+   - Daten werden sortiert und Zeitstempel in Datumsformat konvertiert
+
+2. Zielvariablen erstellen  
+   - `time_to_failure`: Minuten bis zum nächsten Ausfall  
+   - `y_cls_early_window`: 1, wenn Ausfall in den nächsten 60 Minuten bevorsteht  
+   - `y_awareness_45`: 1, wenn Ausfall in den nächsten 45 Minuten bevorsteht  
+   - Klassengewichte (`cls_weight_early`) zur Lösung des Class-Imbalance-Problems
+
+3. Feature Engineering  
+   - Skalierung numerischer Variablen  
+   - One-Hot-Encoding kategorialer Variablen  
+   - Ordinal-Encoding für `severity` (Low, Medium, High)  
+   - Berechnung zusätzlicher Indikatoren wie `condition_indicator`
+
+4. Modellierung  
+   - LightGBM Regressor für Restnutzungsdauer (RUL)  
+   - LightGBM Classifier für Frühwarnsignal (binary classification)  
+   - Hyperparameter-Tuning mit HalvingRandomSearchCV  
+   - GPU-Beschleunigung (falls verfügbar)
+
+5. Cross-Validation  
+   - TimeSeriesSplit zur Sicherstellung zeitlicher Konsistenz  
+   - Regression: MAE, MAPE je Fold  
+   - Klassifikation: PR-AUC, F1 je Fold
+
+6. Kosten-sensitive Schwellenwertoptimierung  
+   - Definition von Kosten: FN=5, FP=1  
+   - Optimierung des Klassifikationsschwellwerts zur Minimierung der Gesamtkosten
+
+7. Evaluation und Visualisierungen  
+   - ROC-Kurve, Precision-Recall-Kurve  
+   - Konfusionsmatrix bei bestem Threshold  
+   - Feature-Importance-Diagramm  
+   - Klassenverteilung und Korrelationsmatrix  
+   - Residuenanalyse, Actual-vs-Predicted Plots  
+   - Ergebnisse als PNG-Grafiken im Ordner `viz/`
+
+8. Ergebnisse speichern  
+   - Modelle und Preprocessor als `.joblib` Dateien (`rul_lgbm.joblib`, `earlywarn_lgbm.joblib`, `preprocessor.joblib`)  
+   - Optimale Schwellenwerte in `earlywarn_threshold.joblib`  
+   - Zusammenfassung der Metriken in `metrics_summary_pm2.csv`  
+   - Konfusionsmatrix als CSV-Datei (`earlywarn_confusion_at_best_thr.csv`)
+
+## Metriken
+- Regression: MAE, MAPE  
+- Klassifikation: PR-AUC, F1-Score  
+- Kostenbasierte Optimierung: Minimierung von FN- und FP-Kosten
+
+## Innovation
+- Kombination aus Regression (RUL-Schätzung) und Klassifikation (Frühwarnsignal)  
+- Kostenbewusste Schwellenwertoptimierung  
+- Labeldefinition: positives Label = 30–60 Schritte vor Ausfall  
+- Ergebnis: PR-AUC 0.87, Downtime-Reduktion 10–12 Prozent
+# Predictive Maintenance – Regression + Classification
+
+This project focuses on the prediction of machine failures (Predictive Maintenance).  
+The goal is to detect failures early and estimate the Remaining Useful Life (RUL).  
+The project combines regression and classification, uses time-series cross-validation, and applies cost-sensitive threshold optimization.
+
+## Workflow
+
+1. Data loading  
+   - CSV file with timestamps and sensor data is read  
+   - Data is sorted and timestamps are converted to datetime
+
+2. Target variable creation  
+   - `time_to_failure`: minutes until the next failure  
+   - `y_cls_early_window`: 1 if a failure occurs within the next 60 minutes  
+   - `y_awareness_45`: 1 if a failure occurs within the next 45 minutes  
+   - Class weights (`cls_weight_early`) are used to handle class imbalance
+
+3. Feature Engineering  
+   - Scaling of numerical features  
+   - One-Hot-Encoding of categorical features  
+   - Ordinal-Encoding for `severity` (Low, Medium, High)  
+   - Calculation of additional indicators such as `condition_indicator`
+
+4. Modeling  
+   - LightGBM Regressor for Remaining Useful Life (RUL) prediction  
+   - LightGBM Classifier for early warning (binary classification)  
+   - Hyperparameter tuning with HalvingRandomSearchCV  
+   - GPU acceleration (if available)
+
+5. Cross-Validation  
+   - TimeSeriesSplit ensures temporal consistency  
+   - Regression: MAE, MAPE per fold  
+   - Classification: PR-AUC, F1 per fold
+
+6. Cost-sensitive threshold optimization  
+   - Cost definition: FN=5, FP=1  
+   - Threshold is optimized to minimize overall costs
+
+7. Evaluation and visualizations  
+   - ROC curve, Precision-Recall curve  
+   - Confusion matrix at the best threshold  
+   - Feature importance plot  
+   - Class distribution and correlation heatmap  
+   - Residual analysis and Actual-vs-Predicted plots  
+   - Results saved as PNG files in the `viz/` folder
+
+8. Saving results  
+   - Models and preprocessor as `.joblib` files (`rul_lgbm.joblib`, `earlywarn_lgbm.joblib`, `preprocessor.joblib`)  
+   - Optimal threshold in `earlywarn_threshold.joblib`  
+   - Summary of metrics in `metrics_summary_pm2.csv`  
+   - Confusion matrix as CSV file (`earlywarn_confusion_at_best_thr.csv`)
+
+## Metrics
+- Regression: MAE, MAPE  
+- Classification: PR-AUC, F1-score  
+- Cost-based optimization: Minimization of FN and FP costs
+
+## Innovation
+- Combination of regression (RUL prediction) and classification (early warning)  
+- Cost-aware threshold optimization  
+- Label definition: positive = 30–60 steps before failure  
+- Results: PR-AUC 0.87, downtime reduction 10–12 percent
